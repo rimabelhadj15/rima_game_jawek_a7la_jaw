@@ -1,4 +1,4 @@
-# Chkoba - Tunisian Card Games (Local Hotspot Multiplayer)
+# jawek a7la jaw - Tunisian Card Games (Local Hotspot Multiplayer)
 
 This folder contains the Dart/Flutter source code (`lib/` + `pubspec.yaml`)
 for the game. It does **not** yet include the native `android/` project files,
