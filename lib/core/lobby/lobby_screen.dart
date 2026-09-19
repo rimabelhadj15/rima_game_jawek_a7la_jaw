@@ -53,15 +53,31 @@ class HostLobbyScreen extends ConsumerStatefulWidget {
 class _HostLobbyScreenState extends ConsumerState<HostLobbyScreen> {
   final _nameController = TextEditingController(text: 'Host');
   bool _hosting = false;
+  bool _starting = false;
   String? _hostIp;
+  String? _startError;
 
   Future<void> _startHosting() async {
-    final manager = ref.read(gameManagerProvider);
-    final ip = await manager.startHosting(_nameController.text.trim().isEmpty ? 'Host' : _nameController.text.trim());
     setState(() {
-      _hosting = true;
-      _hostIp = ip;
+      _starting = true;
+      _startError = null;
     });
+    try {
+      final manager = ref.read(gameManagerProvider);
+      final ip = await manager.startHosting(
+        _nameController.text.trim().isEmpty ? 'Host' : _nameController.text.trim(),
+      );
+      setState(() {
+        _hosting = true;
+        _hostIp = ip;
+        _starting = false;
+      });
+    } catch (e) {
+      setState(() {
+        _starting = false;
+        _startError = 'Could not start server: $e';
+      });
+    }
   }
 
   @override
@@ -83,7 +99,14 @@ class _HostLobbyScreenState extends ConsumerState<HostLobbyScreen> {
                 decoration: const InputDecoration(labelText: 'Your name', border: OutlineInputBorder()),
               ),
               const SizedBox(height: 20),
-              CommonButton(label: 'Start Server', onPressed: _startHosting),
+              if (_startError != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(_startError!, style: const TextStyle(color: Colors.redAccent)),
+                ),
+              _starting
+                  ? const Center(child: CircularProgressIndicator())
+                  : CommonButton(label: 'Start Server', onPressed: _startHosting),
             ] else ...[
               Card(
                 color: Colors.white10,
